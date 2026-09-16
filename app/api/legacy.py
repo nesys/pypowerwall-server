@@ -383,6 +383,81 @@ async def control_api(
     return result
 
 
+@router.get("/api/tesla/tariff_rate")
+async def tesla_tariff_rate():
+    """Return the current Tesla tariff via the dedicated cloud connection."""
+
+    if not gateway_manager._cloud_control:
+        raise HTTPException(
+            status_code=503,
+            detail="Tesla cloud control connection not available",
+        )
+
+    result = await gateway_manager.cloud_control(
+        "poll",
+        "/api/tesla/tariff_rate",
+        force=True,
+        timeout=15.0,
+    )
+
+    if result is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Unable to retrieve Tesla tariff rate",
+        )
+
+    if isinstance(result, dict) and "ERROR" in result:
+        raise HTTPException(
+            status_code=502,
+            detail=result["ERROR"],
+        )
+
+    return result
+
+
+@router.post("/api/tesla/time_of_use_settings")
+async def tesla_time_of_use_settings(
+    data: dict,
+    authorization: Optional[str] = Header(None),
+):
+    """Update Tesla Time-of-Use tariff settings via the cloud connection."""
+
+    verify_control_token(authorization)
+
+    if not gateway_manager._cloud_control:
+        raise HTTPException(
+            status_code=503,
+            detail="Tesla cloud control connection not available",
+        )
+
+    if "tou_settings" not in data or not isinstance(data["tou_settings"], dict):
+        raise HTTPException(
+            status_code=400,
+            detail="'tou_settings' must be an object",
+        )
+
+    result = await gateway_manager.cloud_control(
+        "post",
+        "/api/tesla/time_of_use_settings",
+        data,
+        timeout=20.0,
+    )
+
+    if result is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Unable to update Tesla time-of-use settings",
+        )
+
+    if isinstance(result, dict) and "ERROR" in result:
+        raise HTTPException(
+            status_code=502,
+            detail=result["ERROR"],
+        )
+
+    return result
+
+
 def get_default_gateway():
     """Get the default gateway (first one or 'default' id)."""
     if "default" in gateway_manager.gateways:
