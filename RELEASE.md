@@ -1,6 +1,10 @@
 # Release Notes
 
 ## Version History
+### Upcoming
+
+**Added:**
+- **Tesla tariff and Time-of-Use cloud API routes** — adds `GET /api/tesla/tariff_rate` for reading the current Tesla tariff and authenticated `POST /api/tesla/time_of_use_settings` for updating Time-of-Use tariff settings through the dedicated Tesla cloud-control connection. The routes depend on the pypowerwall tariff/TOU support introduced by pypowerwall PR #382. (#110)
 
 ### [0.6.6] - 2026-09-13
 
