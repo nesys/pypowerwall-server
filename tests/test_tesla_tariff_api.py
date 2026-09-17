@@ -43,7 +43,6 @@ def test_tesla_tariff_rate_forwards_cloud_poll(tesla_client, monkeypatch):
     cloud_control.assert_awaited_once_with(
         "poll",
         "/api/tesla/tariff_rate",
-        force=True,
         timeout=15.0,
     )
 
