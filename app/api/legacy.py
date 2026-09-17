@@ -400,10 +400,10 @@ async def tesla_tariff_rate():
         )
 
     result = await gateway_manager.cloud_control(
-    "poll",
-    "/api/tesla/tariff_rate",
-    timeout=15.0,
-)
+        "poll",
+        "/api/tesla/tariff_rate",
+        timeout=15.0,
+    )
 
     if result is None:
         raise HTTPException(
