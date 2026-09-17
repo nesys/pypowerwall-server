@@ -4,7 +4,7 @@ Legacy Proxy-Compatible API Endpoints
 This router provides backward compatibility with the original pypowerwall proxy server.
 Routes are registered WITHOUT a prefix (included directly at root level in main.py).
 
-Key Routes (all cache-backed for graceful degradation):
+Key Routes (cache-backed unless explicitly noted):
     - /aggregates, /api/meters/aggregates -> Power meter data
     - /soe, /api/system_status/soe -> Battery state of energy
     - /csv, /csv/v2 -> CSV formatted data for Telegraf/InfluxDB
@@ -27,6 +27,12 @@ Auth Routes (powerflow web app compatibility):
 Control Routes (require authentication, except status):
     - GET /control/status -> Control availability (unauthenticated, {"enabled": bool})
     - POST /control/{path} -> Control operations (reserve, mode, etc.)
+
+Tesla Cloud Routes:
+    - GET /api/tesla/tariff_rate -> Cloud tariff read (cached by pypowerwall)
+    - POST /api/tesla/time_of_use_settings -> Authenticated cloud TOU tariff update
+      These routes require the dedicated Tesla cloud-control connection and may
+      return 503 when cloud control is unavailable.
 
 Design Principles:
     1. EXPLICIT ENDPOINTS ONLY - No catch-all /api/{path:path} routes
@@ -394,11 +400,10 @@ async def tesla_tariff_rate():
         )
 
     result = await gateway_manager.cloud_control(
-        "poll",
-        "/api/tesla/tariff_rate",
-        force=True,
-        timeout=15.0,
-    )
+    "poll",
+    "/api/tesla/tariff_rate",
+    timeout=15.0,
+)
 
     if result is None:
         raise HTTPException(
