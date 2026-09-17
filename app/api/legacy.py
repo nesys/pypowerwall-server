@@ -38,9 +38,9 @@ Design Principles:
     1. EXPLICIT ENDPOINTS ONLY - No catch-all /api/{path:path} routes
        Every endpoint is explicitly defined to ensure predictable behavior.
     
-    2. CACHE-BACKED DATA - All data comes from background polling cache
-       This ensures graceful degradation when gateway is slow/offline.
-       No on-demand blocking calls during HTTP requests.
+    2. CACHE-BACKED BY DEFAULT - Gateway monitoring data comes from the
+       background polling cache for graceful degradation. Explicit cloud-only
+       routes documented above may perform on-demand cloud-control calls.
     
     3. SAFE DEFAULTS - Returns empty arrays/nulls on errors
        Keeps UI responsive even during outages.
@@ -49,7 +49,8 @@ Design Principles:
        Prevents request pile-up during network issues.
 
 Adding New Endpoints:
-    If you need a new /api/* endpoint, add it explicitly with cache support.
+    If you need a new /api/* endpoint, add it explicitly and prefer cache-backed
+    data unless the endpoint is intentionally documented as an on-demand exception.
     Do NOT add catch-all routes - they break graceful degradation.
 """
 import logging
